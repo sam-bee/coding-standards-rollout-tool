@@ -63,8 +63,12 @@ Note that it didn't commit anything - you will need to do that yourself.
 
 ### Compile
 
-[@todo not documented yet]
+- `make build` to build your binary
+- `cp ./config/example-config.toml [/path/to/config]` to create your config
+- Edit your config file as appropriate
 
 ### Run
 
-[@todo not documented yet]
+The build command created the binary in `./bin/config-standards-rollout-tool`. Run this executable like this:
+
+`[...]/bin/config-standards-rollout-tool fix --config [/path/to/config]`
