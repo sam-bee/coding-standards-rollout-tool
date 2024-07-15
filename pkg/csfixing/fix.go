@@ -1,21 +1,32 @@
 package csfixing
 
 import (
+	"log"
 	"strings"
 	"sync"
 )
 
-func Fix(conf ApplicationConfig, git gitInterface, systemCaller systemCallerInterface) {
+var logs *log.Logger
+
+func Fix(conf ApplicationConfig, git gitInterface, systemCaller systemCallerInterface, logger *log.Logger) {
 
 	remoteName := conf.getRemoteName()
 	mainlineBranchName := conf.getMainlineBranchName()
 	mainlineTrackingBranch := remoteName + "/" + mainlineBranchName
 
-	git.fetch(remoteName)
+	logs = logger
+
+	// main algorithm
+	update(git, remoteName)
 	trackingBranches := getTrackingBranches(git, remoteName)
 	exemptFiles := getExemptFiles(git, trackingBranches, mainlineTrackingBranch)
 	systemCaller.doSystemCall(conf.getCommandToRun(), conf.getCommandArguments())
 	revertChangesToFiles(git, mainlineTrackingBranch, exemptFiles)
+}
+
+func update(git gitInterface, remoteName string) {
+	git.fetch(remoteName)
+	logs.Printf("Fetching from remote %s\n", remoteName)
 }
 
 func getExemptFiles(git gitInterface, trackingBranches []string, mainlineTrackingBranch string) []string {
@@ -25,11 +36,12 @@ func getExemptFiles(git gitInterface, trackingBranches []string, mainlineTrackin
 		exemptFiles = append(exemptFiles, files...)
 	}
 	uniqueExemptFiles := unique(exemptFiles)
+
+	logs.Printf("Exempt files: %v\n", len(uniqueExemptFiles))
 	return uniqueExemptFiles
 }
 
 func revertChangesToFiles(git gitInterface, mainlineTrackingBranch string, files []string) {
-
 	fileCh := make(chan string, len(files))
 	for _, file := range files {
 		fileCh <- file
@@ -53,12 +65,15 @@ func runChangeRevertingWorkers(noOfWorkers int, fileCh chan string, git gitInter
 func fileChangeRevertingWorker(fileCh <-chan string, git gitInterface, mainlineTrackingBranch string) {
 	for file := range fileCh {
 		git.revertChangesToFile(mainlineTrackingBranch, file)
+		logs.Printf("Reverted changes to file %s\n", file)
 	}
 }
 
 func getTrackingBranches(git gitInterface, remoteName string) []string {
 	allBranches, _ := git.getRemoteBranches()
-	return filterForRelevantTrackingBranches(allBranches, remoteName)
+	filteredBranches := filterForRelevantTrackingBranches(allBranches, remoteName)
+	logs.Println("Tracking branches: ", filteredBranches)
+	return filteredBranches
 }
 
 func filterForRelevantTrackingBranches(allBranches []string, remoteName string) (ret []string) {

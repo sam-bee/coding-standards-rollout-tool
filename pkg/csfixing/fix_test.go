@@ -2,6 +2,8 @@ package csfixing
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"testing"
 )
 
@@ -19,8 +21,11 @@ func TestFix(t *testing.T) {
 	// Set up mock system caller
 	systemCaller := &systemCallerTestDouble{}
 
+	// Null logger
+	logger := log.New(io.Discard, "", 0)
+
 	// Run the function
-	Fix(conf, git, systemCaller)
+	Fix(conf, git, systemCaller, logger)
 
 	// Check that the correct Git commands were run
 	expectedCommands := []string{
