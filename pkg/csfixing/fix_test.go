@@ -119,3 +119,7 @@ func (sc *systemCallerTestDouble) doSystemCall(command string, args []string) ([
 	sc.argsRun = args
 	return []string{}, nil
 }
+
+func TestSystemCallerImplementsInterface(t *testing.T) {
+	var _ systemCallerInterface = (*systemCallerTestDouble)(nil)
+}
