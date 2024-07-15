@@ -11,24 +11,31 @@ func Fix(conf ApplicationConfig, git gitInterface, systemCaller systemCallerInte
 	mainlineTrackingBranch := remoteName + "/" + mainlineBranchName
 
 	git.fetch(remoteName)
+	trackingBranches := getTrackingBranches(git, remoteName)
+	exemptFiles := getExemptFiles(git, trackingBranches, mainlineTrackingBranch)
+	systemCaller.doSystemCall(conf.getCommandToRun(), conf.getCommandArguments())
+	revertChangesToFiles(git, mainlineTrackingBranch, exemptFiles)
+}
 
-	allBranches, _ := git.getRemoteBranches()
-	trackingBranches := filterForRelevantTrackingBranches(allBranches, remoteName)
-
+func getExemptFiles(git gitInterface, trackingBranches []string, mainlineTrackingBranch string) ([]string) {
 	exemptFiles := []string{}
-
 	for _, trackingBranch := range trackingBranches {
 		files, _ := git.getFilesEditedInBranch(trackingBranch, mainlineTrackingBranch)
 		exemptFiles = append(exemptFiles, files...)
 	}
-
 	uniqueExemptFiles := unique(exemptFiles)
+	return uniqueExemptFiles
+}
 
-	systemCaller.doSystemCall(conf.getCommandToRun(), conf.getCommandArguments())
-
-	for _, file := range uniqueExemptFiles {
+func revertChangesToFiles(git gitInterface, mainlineTrackingBranch string, files []string) {
+	for _, file := range files {
 		git.revertChangesToFile(mainlineTrackingBranch, file)
 	}
+}
+
+func getTrackingBranches(git gitInterface, remoteName string) ([]string) {
+	allBranches, _ := git.getRemoteBranches()
+	return filterForRelevantTrackingBranches(allBranches, remoteName)
 }
 
 func filterForRelevantTrackingBranches(allBranches []string, remoteName string) (ret []string) {
