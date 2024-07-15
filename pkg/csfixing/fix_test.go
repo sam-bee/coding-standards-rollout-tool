@@ -15,7 +15,7 @@ func TestFix(t *testing.T) {
 	// Set up mock version control
 	git := &gitTestDouble{}
 
-	git.branchesToReturn = []string{"origin/main", "origin/feature/branch1", "origin/feature/branch2"}
+	git.branchesToReturn = []string{"origin/main", "origin/feature/branch1", "origin/feature/branch2", "origin/HEAD -> origin/main"}
 	git.filesToReturn = []string{"file1.php", "file2.php"}
 
 	// Set up mock system caller
@@ -31,7 +31,6 @@ func TestFix(t *testing.T) {
 	expectedCommands := []string{
 		"git fetch origin",
 		"git branch -r",
-		"git diff --name-only  origin/main origin/main",
 		"git diff --name-only  origin/feature/branch1 origin/main",
 		"git diff --name-only  origin/feature/branch2 origin/main",
 		"git checkout origin/main -- file1.php",
