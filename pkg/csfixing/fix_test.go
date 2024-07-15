@@ -66,20 +66,19 @@ func getConfig() ApplicationConfig {
 				"remote-name":          "origin",
 			},
 			"codingstandards": map[string]interface{}{
-				"command-to-run": "/path/to/fixer",
+				"command-to-run":    "/path/to/fixer",
 				"command-arguments": []string{"fixcommand", "--a-flag"},
 			},
 		},
 	)
 }
 
-
 // gitTestDouble implements same interface as git struct in git.go. Used as a test double to test Fix function.
 
 type gitTestDouble struct {
-	filesToReturn []string
+	filesToReturn    []string
 	branchesToReturn []string
-	commandsRun []string
+	commandsRun      []string
 }
 
 func (g *gitTestDouble) fetch(remoteName string) error {
@@ -106,12 +105,11 @@ func TestGitMockImplementsInterface(t *testing.T) {
 	var _ gitInterface = (*gitTestDouble)(nil)
 }
 
-
 // systemCallerTestDouble implements same interface as SystemCaller struct in systemcall.go. Used as a test double to test Fix function.
 
 type systemCallerTestDouble struct {
 	commandRun string
-	argsRun []string
+	argsRun    []string
 }
 
 func (sc *systemCallerTestDouble) doSystemCall(command string, args []string) ([]string, error) {

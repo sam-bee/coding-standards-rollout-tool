@@ -12,13 +12,13 @@ type systemCallerInterface interface {
 type SystemCaller struct{}
 
 func (sc *SystemCaller) doSystemCall(command string, args []string) ([]string, error) {
-    cmd := exec.Command(command, args...)
+	cmd := exec.Command(command, args...)
 
-    out, err := cmd.Output()
-    if err != nil {
-        return nil, err
-    }
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
 
-    lines := strings.Split(string(out), "\n")
-    return lines, nil
+	lines := strings.Split(string(out), "\n")
+	return lines, nil
 }

@@ -33,7 +33,7 @@ func Fix(conf ApplicationConfig, git gitInterface, systemCaller systemCallerInte
 
 func filterForRelevantTrackingBranches(allBranches []string, remoteName string) (ret []string) {
 	for _, branch := range allBranches {
-		if strings.HasPrefix(branch, remoteName + "/") {
+		if strings.HasPrefix(branch, remoteName+"/") {
 			ret = append(ret, branch)
 		}
 	}
@@ -41,12 +41,12 @@ func filterForRelevantTrackingBranches(allBranches []string, remoteName string) 
 }
 
 func filter(ss []string, test func(string) bool) (ret []string) {
-    for _, s := range ss {
-        if test(s) {
-            ret = append(ret, s)
-        }
-    }
-    return
+	for _, s := range ss {
+		if test(s) {
+			ret = append(ret, s)
+		}
+	}
+	return
 }
 
 func unique(in []string) (ret []string) {
