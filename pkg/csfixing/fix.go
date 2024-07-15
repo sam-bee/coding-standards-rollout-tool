@@ -18,7 +18,7 @@ func Fix(conf ApplicationConfig, git gitInterface, systemCaller systemCallerInte
 	revertChangesToFiles(git, mainlineTrackingBranch, exemptFiles)
 }
 
-func getExemptFiles(git gitInterface, trackingBranches []string, mainlineTrackingBranch string) ([]string) {
+func getExemptFiles(git gitInterface, trackingBranches []string, mainlineTrackingBranch string) []string {
 	exemptFiles := []string{}
 	for _, trackingBranch := range trackingBranches {
 		files, _ := git.getFilesEditedInBranch(trackingBranch, mainlineTrackingBranch)
@@ -29,19 +29,34 @@ func getExemptFiles(git gitInterface, trackingBranches []string, mainlineTrackin
 }
 
 func revertChangesToFiles(git gitInterface, mainlineTrackingBranch string, files []string) {
-	var wg sync.WaitGroup
-	wg.Add(len(files))
 
+	fileCh := make(chan string, len(files))
 	for _, file := range files {
-		go func(file string) {
-			defer wg.Done()
-			git.revertChangesToFile(mainlineTrackingBranch, file)
-		}(file)
+		fileCh <- file
 	}
+	runChangeRevertingWorkers(100, fileCh, git, mainlineTrackingBranch)
+}
+
+func runChangeRevertingWorkers(noOfWorkers int, fileCh chan string, git gitInterface, mainlineTrackingBranch string) {
+	wg := sync.WaitGroup{}
+	wg.Add(noOfWorkers)
+	for i := 0; i < noOfWorkers; i++ {
+		go func() {
+			defer wg.Done()
+			fileChangeRevertingWorker(fileCh, git, mainlineTrackingBranch)
+		}()
+	}
+	close(fileCh)
 	wg.Wait()
 }
 
-func getTrackingBranches(git gitInterface, remoteName string) ([]string) {
+func fileChangeRevertingWorker(fileCh <-chan string, git gitInterface, mainlineTrackingBranch string) {
+	for file := range fileCh {
+		git.revertChangesToFile(mainlineTrackingBranch, file)
+	}
+}
+
+func getTrackingBranches(git gitInterface, remoteName string) []string {
 	allBranches, _ := git.getRemoteBranches()
 	return filterForRelevantTrackingBranches(allBranches, remoteName)
 }
