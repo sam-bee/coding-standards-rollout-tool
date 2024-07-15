@@ -2,6 +2,7 @@ package csfixing
 
 import (
 	"strings"
+	"sync"
 )
 
 func Fix(conf ApplicationConfig, git gitInterface, systemCaller systemCallerInterface) {
@@ -28,9 +29,16 @@ func getExemptFiles(git gitInterface, trackingBranches []string, mainlineTrackin
 }
 
 func revertChangesToFiles(git gitInterface, mainlineTrackingBranch string, files []string) {
+	var wg sync.WaitGroup
+	wg.Add(len(files))
+
 	for _, file := range files {
-		git.revertChangesToFile(mainlineTrackingBranch, file)
+		go func(file string) {
+			defer wg.Done()
+			git.revertChangesToFile(mainlineTrackingBranch, file)
+		}(file)
 	}
+	wg.Wait()
 }
 
 func getTrackingBranches(git gitInterface, remoteName string) ([]string) {
