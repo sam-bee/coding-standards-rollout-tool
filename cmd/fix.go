@@ -11,7 +11,8 @@ var fixCmd = &cobra.Command{
 	Long:  `Fixes coding standards across your whole project, then reverts changes which would have caused a merge conflict with another branch.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		git := &csfixing.Git{}
-		csfixing.Fix(conf, git)
+		systemCaller := &csfixing.SystemCaller{}
+		csfixing.Fix(conf, git, systemCaller)
 	},
 }
 

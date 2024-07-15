@@ -2,6 +2,9 @@
 mainline-branch-name = 'main' # typically 'master' or 'main'
 remote-name = 'origin'
 
-[codingstandards]
 # fixer command appropriate to your chosen language/tool
-command-to-run = './vendor/bin/php-cs-fixer fix ./src/ --rules=@PSR12'
+# e.g. for PHP, using php-cs-fixer:
+# `./vendor/bin/php-cs-fixer fix ./src/ --rules=@PSR12`
+[codingstandards]
+command-to-run = './vendor/bin/php-cs-fixer'
+command-args = ['fix', './src/', '--rules=@PSR12']

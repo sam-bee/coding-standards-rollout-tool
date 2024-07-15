@@ -6,13 +6,15 @@ type ApplicationConfig struct {
 		remoteName         string
 	}
 	codingStandards struct {
-		commandToRun string
+		commandToRun     string
+		commandArguments []string
 	}
 }
 
 func BuildConfig(conf map[string]interface{}) ApplicationConfig {
 	c := ApplicationConfig{}
 	c.codingStandards.commandToRun = conf["codingstandards"].(map[string]interface{})["command-to-run"].(string)
+	c.codingStandards.commandArguments = conf["codingstandards"].(map[string]interface{})["command-arguments"].([]string)
 	c.git.mainlineBranchName = conf["git"].(map[string]interface{})["mainline-branch-name"].(string)
 	c.git.remoteName = conf["git"].(map[string]interface{})["remote-name"].(string)
 	c.validateConfig()
@@ -28,6 +30,9 @@ func (c *ApplicationConfig) getRemoteName() string {
 func (c *ApplicationConfig) getCommandToRun() string {
 	return c.codingStandards.commandToRun
 }
+func (c *ApplicationConfig) getCommandArguments() []string {
+	return c.codingStandards.commandArguments
+}
 
 func (c *ApplicationConfig) validateConfig() {
 	if c.git.mainlineBranchName == "" {
@@ -38,5 +43,8 @@ func (c *ApplicationConfig) validateConfig() {
 	}
 	if c.codingStandards.commandToRun == "" {
 		panic("Config error: codingstandards.command-to-run not set")
+	}
+	if c.codingStandards.commandArguments == nil {
+		panic("Config error: codingstandards.command-arguments not set")
 	}
 }
