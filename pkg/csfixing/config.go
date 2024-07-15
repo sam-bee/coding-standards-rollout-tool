@@ -14,7 +14,11 @@ type ApplicationConfig struct {
 func BuildConfig(conf map[string]interface{}) ApplicationConfig {
 	c := ApplicationConfig{}
 	c.codingStandards.commandToRun = conf["codingstandards"].(map[string]interface{})["command-to-run"].(string)
-	c.codingStandards.commandArguments = conf["codingstandards"].(map[string]interface{})["command-arguments"].([]string)
+
+	for _, commandArgument := range conf["codingstandards"].(map[string]interface{})["command-arguments"].([]interface{}) {
+		c.codingStandards.commandArguments = append(c.codingStandards.commandArguments, commandArgument.(string))
+	}
+
 	c.git.mainlineBranchName = conf["git"].(map[string]interface{})["mainline-branch-name"].(string)
 	c.git.remoteName = conf["git"].(map[string]interface{})["remote-name"].(string)
 	c.validateConfig()
