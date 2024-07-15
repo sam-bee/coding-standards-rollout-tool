@@ -11,9 +11,7 @@ var logs *log.Logger
 func Fix(conf ApplicationConfig, git gitInterface, systemCaller systemCallerInterface, logger *log.Logger) {
 
 	remoteName := conf.getRemoteName()
-	mainlineBranchName := conf.getMainlineBranchName()
-	mainlineTrackingBranch := remoteName + "/" + mainlineBranchName
-
+	mainlineTrackingBranch := remoteName + "/" + conf.getMainlineBranchName()
 	logs = logger
 
 	// main algorithm
@@ -29,6 +27,14 @@ func update(git gitInterface, remoteName string) {
 	logs.Printf("Fetching from remote %s\n", remoteName)
 }
 
+func getTrackingBranches(git gitInterface, remoteName string) []string {
+	allBranches, _ := git.getRemoteBranches()
+	allBranches = trim(allBranches)
+	filteredBranches := filterForRelevantTrackingBranches(allBranches, remoteName)
+	logs.Printf("There are %d tracking branches starting with '%s' from the remote\n", len(filteredBranches), remoteName + "/")
+	return filteredBranches
+}
+
 func getExemptFiles(git gitInterface, trackingBranches []string, mainlineTrackingBranch string) []string {
 	exemptFiles := []string{}
 	for _, trackingBranch := range trackingBranches {
@@ -37,7 +43,7 @@ func getExemptFiles(git gitInterface, trackingBranches []string, mainlineTrackin
 	}
 	uniqueExemptFiles := unique(exemptFiles)
 
-	logs.Printf("Exempt files: %v\n", len(uniqueExemptFiles))
+	logs.Printf("There are %d exempt files which should be reverted after coding standards fixes\n", len(uniqueExemptFiles))
 	return uniqueExemptFiles
 }
 
@@ -65,23 +71,16 @@ func runChangeRevertingWorkers(noOfWorkers int, fileCh chan string, git gitInter
 func fileChangeRevertingWorker(fileCh <-chan string, git gitInterface, mainlineTrackingBranch string) {
 	for file := range fileCh {
 		git.revertChangesToFile(mainlineTrackingBranch, file)
-		logs.Printf("Reverted changes to file %s\n", file)
 	}
-}
-
-func getTrackingBranches(git gitInterface, remoteName string) []string {
-	allBranches, _ := git.getRemoteBranches()
-	filteredBranches := filterForRelevantTrackingBranches(allBranches, remoteName)
-	logs.Println("Tracking branches: ", filteredBranches)
-	return filteredBranches
 }
 
 func filterForRelevantTrackingBranches(allBranches []string, remoteName string) (ret []string) {
-	for _, branch := range allBranches {
-		if strings.HasPrefix(branch, remoteName+"/") {
-			ret = append(ret, branch)
-		}
-	}
+	ret = filter(
+		allBranches,
+		func(branch string) bool {
+			return strings.HasPrefix(branch, remoteName+"/")
+		},
+	)
 	return
 }
 
@@ -101,6 +100,13 @@ func unique(in []string) (ret []string) {
 	}
 	for s := range m {
 		ret = append(ret, s)
+	}
+	return
+}
+
+func trim(s []string) (ret []string) {
+	for _, str := range s {
+		ret = append(ret, strings.TrimSpace(str))
 	}
 	return
 }
