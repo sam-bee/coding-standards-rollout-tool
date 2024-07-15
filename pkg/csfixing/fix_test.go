@@ -67,7 +67,7 @@ func getConfig() ApplicationConfig {
 			},
 			"codingstandards": map[string]interface{}{
 				"command-to-run":    "/path/to/fixer",
-				"command-arguments": []string{"fixcommand", "--a-flag"},
+				"command-arguments": []interface{}{"fixcommand", "--a-flag"},
 			},
 		},
 	)
