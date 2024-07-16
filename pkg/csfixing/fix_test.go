@@ -116,10 +116,10 @@ type systemCallerTestDouble struct {
 	argsRun    []string
 }
 
-func (sc *systemCallerTestDouble) doSystemCall(command string, args []string) ([]string, error) {
+func (sc *systemCallerTestDouble) doSystemCall(command string, args []string) ([]string, int, error) {
 	sc.commandRun = command
 	sc.argsRun = args
-	return []string{}, nil
+	return []string{}, 0, nil
 }
 
 func TestSystemCallerImplementsInterface(t *testing.T) {

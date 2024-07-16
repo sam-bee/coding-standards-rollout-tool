@@ -18,7 +18,7 @@ func Fix(conf ApplicationConfig, git gitInterface, systemCaller systemCallerInte
 	update(git, remoteName)
 	trackingBranches := getTrackingBranches(git, remoteName, mainlineTrackingBranch)
 	exemptFiles := getExemptFiles(git, trackingBranches, mainlineTrackingBranch)
-	systemCaller.doSystemCall(conf.getCommandToRun(), conf.getCommandArguments())
+	fixCodingStandards(systemCaller, conf.getCommandToRun(), conf.getCommandArguments())
 	revertChangesToFiles(git, mainlineTrackingBranch, exemptFiles)
 }
 
@@ -55,7 +55,16 @@ func getExemptFiles(git gitInterface, trackingBranches []string, mainlineTrackin
 	return uniqueExemptFiles
 }
 
+func fixCodingStandards(systemCaller systemCallerInterface, commandToRun string, commandArguments []string) {
+	logs.Printf("Running coding standards fixer command: %s %s\n", commandToRun, strings.Join(commandArguments, " "))
+	_, exitCode, _ := systemCaller.doSystemCall(commandToRun, commandArguments)
+	if exitCode != 0 {
+		logs.Printf("Command failed with exit code %d. Your configured CS fixing command is probably not working.\n", exitCode)
+	}
+}
+
 func revertChangesToFiles(git gitInterface, mainlineTrackingBranch string, files []string) {
+	logs.Printf("Reverting changes to %d files\n", len(files))
 	fileCh := make(chan string, len(files))
 	for _, file := range files {
 		fileCh <- file

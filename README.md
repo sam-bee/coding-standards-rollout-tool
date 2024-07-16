@@ -35,12 +35,14 @@ to the tool with the `--config` flag. Here is an example config:
 ```toml
 [git]
 mainline-branch-name = 'main' # typically 'master' or 'main'
-remote-name = 'origin' # usually 'origin'
+remote-name = 'origin'
 
+# fixer command appropriate to your chosen language/tool
+# e.g. for PHP, using php-cs-fixer:
+# `./vendor/bin/php-cs-fixer fix ./src/ --rules=@PSR12`
 [codingstandards]
-# Fixer command appropriate to your chosen language/tool.
-# It is recommended to test this command separately.
-command-to-run = './vendor/bin/php-cs-fixer fix ./src/ --rules=@PSR12'
+command-to-run = './vendor/bin/php-cs-fixer'
+command-arguments = ['fix', './src/', '--rules=@PSR12']
 ```
 
 ## What is it Doing?
