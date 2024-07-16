@@ -18,8 +18,8 @@ type Git struct{}
  * Runs something like `git fetch origin`
  * This fetches the latest changes from the remote
  */
-func (g *Git) fetch(remoteName string) error {
-	_, err := issueCommand("git", []string{"fetch", remoteName})
+func (g *Git) fetch(remote string) error {
+	_, err := issueCommand("git", []string{"fetch", remote})
 	return err
 }
 
@@ -35,16 +35,16 @@ func (g *Git) getRemoteBranches() ([]string, error) {
  * Runs something like `git diff --name-only origin/feature-branch-name origin/main`
  * This gets a list of files edited in a branch
  */
-func (g *Git) getFilesEditedInBranch(featureTrackingBranch string, mainlineTrackingBranch string) ([]string, error) {
-	return issueCommand("git", []string{"diff", "--name-only", featureTrackingBranch, mainlineTrackingBranch})
+func (g *Git) getFilesEditedInBranch(branch string, basisBranch string) ([]string, error) {
+	return issueCommand("git", []string{"diff", "--name-only", branch, basisBranch})
 }
 
 /**
  * Runs something like `git checkout origin/main -- ./path/to/file.php`
  * This reverts local changes to a file
  */
-func (g *Git) revertChangesToFile(mainlineTrackingBranch, file string) error {
-	_, err := issueCommand("git", []string{"checkout", "--", file})
+func (g *Git) revertChangesToFile(mainBranch, file string) error {
+	_, err := issueCommand("git", []string{"checkout", mainBranch, "--", file})
 	return err
 }
 

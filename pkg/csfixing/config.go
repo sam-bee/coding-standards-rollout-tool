@@ -15,8 +15,8 @@ func BuildConfig(conf map[string]interface{}) ApplicationConfig {
 	c := ApplicationConfig{}
 	c.codingStandards.commandToRun = conf["codingstandards"].(map[string]interface{})["command-to-run"].(string)
 
-	for _, commandArgument := range conf["codingstandards"].(map[string]interface{})["command-arguments"].([]interface{}) {
-		c.codingStandards.commandArguments = append(c.codingStandards.commandArguments, commandArgument.(string))
+	for _, arg := range conf["codingstandards"].(map[string]interface{})["command-arguments"].([]interface{}) {
+		c.codingStandards.commandArguments = append(c.codingStandards.commandArguments, arg.(string))
 	}
 
 	c.git.mainlineBranchName = conf["git"].(map[string]interface{})["mainline-branch-name"].(string)
